@@ -15,7 +15,7 @@ import javax.swing.Timer;
 
 import core.Neat;
 import core.Objective;
-import core.Species;
+import core.hierarchy.Species;
 
 public class NeatSnake extends JApplet implements Objective, KeyListener {
 
@@ -48,7 +48,7 @@ public class NeatSnake extends JApplet implements Objective, KeyListener {
 		
 		setSize(numSquares * squareSize, numSquares * squareSize); // 15 x 15 squares each 50 pixels
 		setBackground(Color.gray);
-
+		
 		Timer t = new Timer(1000 / 60, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -78,7 +78,7 @@ public class NeatSnake extends JApplet implements Objective, KeyListener {
 
 	private void draw() {
 		Graphics g = getGraphics();
-
+		
 		for (int i = squareSize - 1; i < numSquares; i += squareSize) {
 			g.drawLine(i, 0, i, getHeight());
 			g.drawLine(0, i, getWidth(), i);
