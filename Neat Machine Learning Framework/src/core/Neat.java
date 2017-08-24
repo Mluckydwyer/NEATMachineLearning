@@ -8,6 +8,7 @@ import core.hierarchy.Species;
 public class Neat {
 	
 	public static final int MAX_HIDDEN_NODES = 1000000; // 1,000,000
+	public static final int STALE_SPECIES = 15;
 	
 	//public static final double PERTURB_CONNECTION_WEIGHT_CHANCE = 0.90; TODO
 	public static final double CONNECTION_MUTATION_CHANCE = 0.25;
@@ -16,8 +17,7 @@ public class Neat {
 	public static final double NODE_MUTATION_CHANCE = 0.50;
 	public static final double ENABLE_MUTATION_CHANCE = 0.20;
 	public static final double DISABLE_MUTATION_CHANCE = 0.40;
-	public static final double STEP_SIZE = 0.10;
-	
+	public static final double STEP_SIZE = 0.10;	
 	
 	public static Objective obj;
 	public ArrayList<Generation> generations;

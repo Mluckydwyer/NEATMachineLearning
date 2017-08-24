@@ -21,7 +21,7 @@ public class Genome {
 		latestNetwork = null;
 		fitness = 0;
 		globalRank = 0;
-		numNeurons = Neat.NUMBER_OF_INPUTS;
+		numNeurons = 0;
 		
 		mutationRates = new HashMap<>();
 		mutationRates.put("connections", Neat.CONNECTION_MUTATION_CHANCE);
@@ -37,13 +37,18 @@ public class Genome {
 	public Genome(boolean basicGenome) {
 		this();
 		if (basicGenome) {
-			
+			numNeurons = Neat.NUMBER_OF_INPUTS;
+			mutate();
 		}
 	}
-	
+
 	public NeuralNet getNetwork() {
 		latestNetwork = new NeuralNet(this);
 		return latestNetwork;
 	}
 
+	private void mutate() {
+		// TODO Auto-generated method stub
+	}
+	
 }

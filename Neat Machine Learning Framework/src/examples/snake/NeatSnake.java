@@ -123,8 +123,6 @@ public class NeatSnake implements Objective, KeyListener {
 			g.drawLine(0, i, mainFrame.getWidth(), i);
 		}
 
-		System.out.println("TEST");
-
 		g.dispose();
 		bs.show();
 	}
