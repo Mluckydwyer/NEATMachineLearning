@@ -149,7 +149,7 @@ public class NeatSnake implements Objective, KeyListener {
 
 		if (e.getKeyCode() == 38) {//UP
 			snakes.get(0).move(0);
-			System.out.println("UP");
+			System.out.println("UP");//prints 2?
 		}
 		if (e.getKeyCode() == 39) {//RIGHT
 			snakes.get(0).move(1);
