@@ -5,7 +5,7 @@ public class MainRunner {
 		// TODO Auto-generated method stub
 	
 NeatSnake neatsnake = new NeatSnake();
-//runs
+//run
 	}
 
 }
