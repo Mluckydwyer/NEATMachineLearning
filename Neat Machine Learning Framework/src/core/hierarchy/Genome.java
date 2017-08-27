@@ -1,5 +1,6 @@
 package core.hierarchy;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
 import core.Neat;
@@ -9,12 +10,12 @@ import java.util.HashMap;
 
 public class Genome {
 	
-	public ArrayList<Gene> genes; // connections
-	public HashMap<String, Double> mutationRates;
+	protected ArrayList<Gene> genes; // connections
+	protected HashMap<String, Double> mutationRates;
 	private NeuralNet latestNetwork;
-	public double fitness;
-	public int globalRank;
-	public int numNeurons; // maxneuron
+	protected double fitness;
+	protected int globalRank;
+	protected int numNeurons; // maxneuron
 	
 	public Genome() {
 		genes = new ArrayList<>();
@@ -42,9 +43,21 @@ public class Genome {
 		}
 	}
 
-	public NeuralNet getNetwork() {
+	protected void genNetwork() {
 		latestNetwork = new NeuralNet(this);
-		return latestNetwork;
+	}
+	
+	protected double getFitness() {
+		return fitness;
+	}
+	
+	public void setFitness(double fitness) {
+		this.fitness = fitness;
+	}
+	
+	public double[] propagateNetwork(double[] inputs) {
+		if (inputs.length != Neat.NUMBER_OF_INPUTS) throw new InvalidParameterException("Neat: Inputs Array Length Must Match The Number of Input Nodes(" + Neat.NUMBER_OF_INPUTS +"): " + inputs.length);
+		return latestNetwork.propagate(inputs);
 	}
 
 	private void mutate() {

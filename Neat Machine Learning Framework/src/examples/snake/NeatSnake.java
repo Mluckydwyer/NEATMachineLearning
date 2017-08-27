@@ -4,25 +4,19 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import java.util.Random;
-import javax.swing.SwingUtilities;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
-
 import core.Neat;
-import core.Objective;
+import core.NeatObjective;
+import core.hierarchy.Genome;
 import core.hierarchy.Species;
 
-public class NeatSnake implements Objective, KeyListener {
-
-	private static final long serialVersionUID = 8208701794491690571L;
+public class NeatSnake implements NeatObjective, KeyListener {
 
 	public enum Direction {
 		UP, DOWN, LEFT, RIGHT
@@ -59,9 +53,8 @@ public class NeatSnake implements Objective, KeyListener {
 		};
 
 		if (AI)
-			neat = new Neat(this, numSquares * numSquares, Direction.values().length, targetFitness, populationSize);
-		else
-			snakes.add(new Snake());
+			neat = new Neat("NEAT Snake", this, numSquares * numSquares, Direction.values().length, populationSize, targetFitness);
+		else snakes.add(new Snake());
 
 		random = new Random(12345); // test seed
 		running = true;
@@ -115,11 +108,14 @@ public class NeatSnake implements Objective, KeyListener {
 				for (int j = 0; j < numSquares; j++) {
 					if (tempsnake[i][j] == -1) {
 						g.setColor(Color.CYAN);
-					} else if (tempsnake[i][j] == 1) {
+					}
+					else if (tempsnake[i][j] == 1) {
 						g.setColor(Color.BLACK);
-					} else if (tempsnake[i][j] == 2) {
+					}
+					else if (tempsnake[i][j] == 2) {
 						g.setColor(Color.BLACK);
-					} else {
+					}
+					else {
 						g.setColor(Color.WHITE);
 					}
 					g.fillRect(i * squareSize + leftcomp, j * squareSize + upcomp, squareSize + leftcomp,
@@ -147,17 +143,17 @@ public class NeatSnake implements Objective, KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 
-		if (e.getKeyCode() == 38) {//UP
+		if (e.getKeyCode() == 38) {// UP
 			snakes.get(0).move(0);
-			System.out.println("UP");//prints 2?
+			System.out.println("UP");// prints 2?
 		}
-		if (e.getKeyCode() == 39) {//RIGHT
+		if (e.getKeyCode() == 39) {// RIGHT
 			snakes.get(0).move(1);
 		}
-		if (e.getKeyCode() == 40) {//DOWN
+		if (e.getKeyCode() == 40) {// DOWN
 			snakes.get(0).move(2);
 		}
-		if (e.getKeyCode() == 41) {//LEFT
+		if (e.getKeyCode() == 41) {// LEFT
 			snakes.get(0).move(3);
 		}
 	}
@@ -169,9 +165,8 @@ public class NeatSnake implements Objective, KeyListener {
 	}
 
 	@Override
-	public int[] calculateFitness(ArrayList<Species> s) {
+	public void calculateFitness(Genome genome) {
 		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
