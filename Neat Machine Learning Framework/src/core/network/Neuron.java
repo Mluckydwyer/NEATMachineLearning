@@ -7,14 +7,21 @@ import core.hierarchy.Gene;
 public class Neuron {
 
 	public ArrayList<Gene> incoming;
-	private double value;
+	protected double value;
 	
 	public Neuron() {
 		incoming = new ArrayList<>();
+		value = 0;
 	}
 
-	public double getValue() {
-		return value;
+	protected double sumIncoming(Neuron[] neurons) {
+		double sum = 0;
+
+		for (Gene gene : incoming) {
+			sum += neurons[gene.in].value * gene.weight;
+		}
+		
+		return sum;
 	}
 	
 }

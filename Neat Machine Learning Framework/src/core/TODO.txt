@@ -1,11 +1,8 @@
 Neat Framework TODO List:
 
 Core:
-1. Genome Mutate Code
-2. Gene Class
-3. Breed Child Code (Jason)
-4. Crossover Code
-5. Network Code
+1. Breed Child Code (Jason)
+2. Crossover Code
 
 
 Snake Example:

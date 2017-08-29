@@ -10,7 +10,7 @@ public class Neat {
 	public static final int MAX_HIDDEN_NODES = 1000000; // 1,000,000
 	public static final int STALE_SPECIES = 15;
 
-	// public static final double PERTURB_CONNECTION_WEIGHT_CHANCE = 0.90; TODO
+	public static final double PERTURB_CONNECTION_WEIGHT_CHANCE = 0.90;
 	public static final double CONNECTION_MUTATION_CHANCE = 0.25;
 	public static final double LINK_MUTATION_CHANCE = 2.00;
 	public static final double BIAS_MUTATION_CHANCE = 0.40;
@@ -22,6 +22,8 @@ public class Neat {
 	public static final double DELTA_THRESHOLD = 1.0;
 	public static final double DELTA_DISJOINT = 2.0;
 	public static final double DELTA_WEIGHTS = 0.4;
+	
+	public static final double BIAS_NODE_VALUE = 1.0;
 
 	public static NeatObjective neatObjective;
 	public static SimultaneousNeatObjective simultaneousNeatObjective;

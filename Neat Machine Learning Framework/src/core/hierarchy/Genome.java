@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class Genome {
 	
-	protected ArrayList<Gene> genes; // connections
+	public ArrayList<Gene> genes; // connections
 	protected HashMap<String, Double> mutationRates;
 	private NeuralNet latestNetwork;
 	protected double fitness;
@@ -43,8 +43,16 @@ public class Genome {
 		}
 	}
 
+	private <E> int randomValue(ArrayList<E> values) {
+		return (int) Math.round(Math.random() * values.size());
+	}
+	
+	private int randomNeuron(boolean allowInputs) {
+		return Integer.MIN_VALUE;
+	}
+	
 	protected void genNetwork() {
-		latestNetwork = new NeuralNet(this);
+		latestNetwork = new NeuralNet(genes);
 	}
 	
 	protected double getFitness() {
@@ -55,13 +63,137 @@ public class Genome {
 		this.fitness = fitness;
 	}
 	
+	private boolean[] convertToBoolean(double[] doubles) {
+		boolean[] booleans = new boolean[doubles.length];
+		
+		for (int i = 0; i > 0; i++)
+			if (doubles[i] > 0.5) booleans[i] = true;
+		
+		return booleans;
+	}
+	
+	public boolean[] propagateNetworkBooleanOut(double[][] inputs) {
+		return convertToBoolean(propagateNetwork(inputs));
+	}
+	
+
+	public boolean[] propagateNetworkBooleanOut(double[] inputs) {
+		return convertToBoolean(propagateNetwork(inputs));
+	}
+	
+	public double[] propagateNetwork(double[][] inputs) {
+		double[] inputs1D = new double[inputs.length * inputs[0].length];
+
+		for (int x = 0; x < inputs.length; x++)
+			for (int y = 0; y < inputs[x].length; y++)
+				inputs1D[y * inputs.length + x] = inputs[x][y];
+		
+		return propagateNetwork(inputs1D);
+	}
+	
 	public double[] propagateNetwork(double[] inputs) {
 		if (inputs.length != Neat.NUMBER_OF_INPUTS) throw new InvalidParameterException("Neat: Inputs Array Length Must Match The Number of Input Nodes(" + Neat.NUMBER_OF_INPUTS +"): " + inputs.length);
 		return latestNetwork.propagate(inputs);
 	}
 
 	private void mutate() {
-		// TODO Auto-generated method stub
+		perturbMutationChances();
+		if (Math.random() < mutationRates.get("connections")) perturbWeightMutate();
+		
+		for (double p = mutationRates.get("link"); p > 0; p--)
+			if (Math.random() < p) linkMutate(false);
+		
+		for (double p = mutationRates.get("bias"); p > 0; p--)
+			if (Math.random() < p) linkMutate(true);
+		
+		for (double p = mutationRates.get("node"); p > 0; p--)
+			if (Math.random() < p) nodeMutate();
+		
+		for (double p = mutationRates.get("enable"); p > 0; p--)
+			if (Math.random() < p) enableDisableMutate("enable");
+		
+		for (double p = mutationRates.get("disable"); p > 0; p--)
+			if (Math.random() < p) enableDisableMutate("disable");
+		
+	}
+	
+	private void perturbMutationChances() {	
+		for (String key : mutationRates.keySet()) {
+				if (Math.random() > 0.5) mutationRates.replace(key, mutationRates.get(key), mutationRates.get(key) * 0.95);
+				else mutationRates.replace(key, mutationRates.get(key), mutationRates.get(key) * 1.05);
+		}
+	}
+	
+	// point mutate
+	private void perturbWeightMutate() {
+		for (Gene gene : genes) {
+			if (Math.random() > Neat.PERTURB_CONNECTION_WEIGHT_CHANCE) gene.weight += Math.random() * mutationRates.get("step") * 2 - mutationRates.get("step");
+			else gene.weight = Math.random() * 4 - 2;
+		}
+	}
+	
+	// Also is bias mutation
+	private void linkMutate(boolean isBiasMutate) {
+		int neuron1 = randomNeuron(true);
+		int neuron2 = randomNeuron(false);
+		if (neuron1 <= Neat.NUMBER_OF_INPUTS && neuron2 <= Neat.NUMBER_OF_INPUTS) return; // not enough neurons
+		
+		if (neuron2 <= Neat.NUMBER_OF_INPUTS) { // not sure if this is needed
+			int temp = neuron1;
+			neuron1 = neuron2;
+			neuron2 = temp;
+		}
+		
+		Gene newGene = new Gene();
+		newGene.in = neuron1;
+		newGene.out = neuron2;
+
+		if (isBiasMutate) newGene.in = 0;
+		
+		for (Gene gene : genes) {
+			if (gene.in == newGene.in && gene.out == newGene.out) return;
+		}
+		
+		newGene.innovationNumber = Neat.getNextInnovationNum();
+		newGene.weight = Math.random() * 4 - 2;
+		genes.add(newGene);
+	}
+	
+	private void nodeMutate() {
+		if (genes.isEmpty()) return;
+		
+		numNeurons++;
+		Gene randomGene = genes.get(randomValue(genes));
+		
+		if (!randomGene.isEnabled) return;
+		randomGene.isEnabled = false;
+		
+		Gene splitGene = new Gene(randomGene);
+		splitGene.out = numNeurons;
+		splitGene.weight = 1.0;
+		splitGene.innovationNumber = Neat.getNextInnovationNum();
+		splitGene.isEnabled = true;
+		genes.add(splitGene);
+		
+		splitGene = new Gene(randomGene);
+		splitGene.in = numNeurons;
+		splitGene.innovationNumber = Neat.getNextInnovationNum();
+		splitGene.isEnabled = true;
+		genes.add(splitGene);
+	}
+	
+	private void enableDisableMutate(String mode) {
+		ArrayList<Gene> possibleGenes = new ArrayList<>();
+		
+		for (Gene gene : genes) {
+			if (gene.isEnabled && mode.equals("disable")) possibleGenes.add(gene);
+			else if (!gene.isEnabled && mode.equals("enable")) possibleGenes.add(gene);
+		}
+		
+		if (!possibleGenes.isEmpty()) {
+			int randomIndex = randomValue(possibleGenes);
+			possibleGenes.get(randomIndex).isEnabled = !possibleGenes.get(randomIndex).isEnabled;
+		}
 	}
 	
 }
