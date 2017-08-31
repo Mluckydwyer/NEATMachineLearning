@@ -35,28 +35,28 @@ public class NeatParameters {
 	/**
 	 * @return the inputs
 	 */
-	public int getInputs() {
+	public int getNumberOfInputs() {
 		return inputs;
 	}
 
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public void setInputs(int inputs) {
+	public void setNumberOfInputs(int inputs) {
 		this.inputs = inputs;
 	}
 
 	/**
 	 * @return the outputs
 	 */
-	public int getOutputs() {
+	public int getNumberOfOutputs() {
 		return outputs;
 	}
 
 	/**
 	 * @param outputs the outputs to set
 	 */
-	public void setOutputs(int outputs) {
+	public void setNumberOfOutputs(int outputs) {
 		this.outputs = outputs;
 	}
 

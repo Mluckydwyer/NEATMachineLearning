@@ -2,11 +2,8 @@ Neat Framework TODO List:
 
 Core:
 1. Breed Child Code (Jason)
-2. Crossover Code
+3. Backup & Save
 
 
 Snake Example:
-?
-
-XOR Test Example:
 ?

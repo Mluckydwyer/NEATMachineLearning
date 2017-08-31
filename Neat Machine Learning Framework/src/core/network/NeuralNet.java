@@ -33,7 +33,8 @@ public class NeuralNet {
 					neurons[gene.out] = new Neuron();
 				}
 				
-				neurons[gene.out].incoming.add(gene);
+				if (gene.isRecurrent) neurons[gene.out].recurrentConnection = gene;
+				else neurons[gene.out].incoming.add(gene);
 				
 				if (neurons[gene.in] == null) {
 					neurons[gene.in] = new Neuron();
@@ -57,6 +58,9 @@ public class NeuralNet {
 		
 		for (int i = 1; i <= outputs.length; i++)
 			outputs[i - 1] = neurons[Neat.NUMBER_OF_INPUTS + Neat.MAX_HIDDEN_NODES + i].value;
+		
+		for (Neuron neuron : neurons)
+			neuron.history.add(neuron.value);
 		
 		return outputs;
 	}

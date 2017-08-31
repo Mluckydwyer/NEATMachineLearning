@@ -92,7 +92,7 @@ public class Generation {
 		for (Species s : species) {
 			s.sort();
 
-			for (int i = s.genomes.size(); i > Math.ceil(s.genomes.size() / 2) - 1; i--)
+			for (int i = s.genomes.size(); i > Math.ceil(s.genomes.size() / 2); i--)
 				s.genomes.remove(i);
 		}
 	}
@@ -134,6 +134,40 @@ public class Generation {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	private Genome crossover(Genome g1, Genome g2) {
+		Genome child = new Genome();
+		
+		if (g2.fitness > g1.fitness) {
+			Genome temp = g1;
+			g1 = g2;
+			g2 = temp;
+		}
+		
+		for (Gene gene : g1.genes) {
+			Gene possibleMatch = g2.hasInnovation(gene);
+			
+			if (possibleMatch != null) {
+				if (Math.random() > 0.5)
+					child.genes.add(gene);
+				else
+					child.genes.add(possibleMatch);
+			}
+			else {
+				if (g1.fitness == g2.fitness)
+					if (Math.random() > 0.5) child.genes.add(gene);
+				else
+					child.genes.add(gene);
+			}
+			
+		}
+		
+		if (g1.fitness == g2.fitness)
+			for (Gene gene : g2.genes)
+				if (g1.hasInnovation(gene) == null && Math.random() > 0.5) child.genes.add(gene);	
+		
+		return child;
+	}
 
 	private void cullSpeciesToOne() {
 		for (Species s : species) {
@@ -160,7 +194,7 @@ public class Generation {
 					g.genNetwork();
 					genomes.add(g);
 				}
-			
+
 			Neat.simultaneousNeatObjective.calculateFitness(genomes);
 		}
 		else {
@@ -176,28 +210,28 @@ public class Generation {
 	private ArrayList<Species> speciateGenomes(ArrayList<Genome> children) {
 		ArrayList<Species> species = new ArrayList<>();
 		species.addAll(this.species);
-		
+
 		for (Genome g : children) {
 			boolean foundSpecies = false;
-			
+
 			for (Species s : species) {
 				double deltaDisjoint = Neat.DELTA_DISJOINT * disjointValue(g.genes, s.genomes.get(0).genes);
 				double deltaWeights = Neat.DELTA_WEIGHTS * weightsValue(g.genes, s.genomes.get(0).genes);
-				
+
 				if (deltaDisjoint + deltaWeights < Neat.DELTA_THRESHOLD) {
 					s.genomes.add(g);
 					foundSpecies = true;
 					break;
 				}
 			}
-			
+
 			if (!foundSpecies) {
 				Species newSpecies = new Species();
 				newSpecies.genomes.add(g);
 				species.add(newSpecies);
 			}
 		}
-		
+
 		return species;
 	}
 
@@ -205,35 +239,35 @@ public class Generation {
 		for (int i = 0; i < genes.size(); i++) {
 			if (genes.get(i).innovationNumber == gene.innovationNumber) return i;
 		}
-		
+
 		return -1;
 	}
-	
+
 	private double disjointValue(ArrayList<Gene> genes1, ArrayList<Gene> genes2) {
 		int numDisjointedGenes = 0;
-		
+
 		for (Gene g : genes1)
 			if (containsInovation(genes2, g) == -1) numDisjointedGenes++;
-		
+
 		for (Gene g : genes2)
 			if (containsInovation(genes1, g) == -1) numDisjointedGenes++;
-		
+
 		return numDisjointedGenes / Math.max(genes1.size(), genes2.size());
 	}
-	
+
 	private double weightsValue(ArrayList<Gene> genes1, ArrayList<Gene> genes2) {
 		int numShared = 0;
 		double sum = 0;
-		
+
 		for (Gene g : genes1) {
 			int i = containsInovation(genes2, g);
-			
-			if (i != -1){
+
+			if (i != -1) {
 				sum += Math.abs(g.weight - genes2.get(i).weight);
 				numShared++;
 			}
 		}
-		
+
 		return sum / numShared;
 	}
 

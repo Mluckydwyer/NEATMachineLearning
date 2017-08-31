@@ -7,6 +7,8 @@ import core.Neat;
 import core.network.NeuralNet;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 public class Genome {
 	
@@ -48,7 +50,27 @@ public class Genome {
 	}
 	
 	private int randomNeuron(boolean allowInputs) {
-		return Integer.MIN_VALUE;
+		HashSet<Integer> possibleNodes = new HashSet<>();
+		
+		for (int i = 0; i <= Neat.NUMBER_OF_INPUTS; i++)
+			possibleNodes.add(i);
+		
+		for (Gene gene : genes) {
+			possibleNodes.add(gene.in);
+			possibleNodes.add(gene.out);
+		}
+		
+		for (int i = 1; i <= Neat.NUMBER_OF_OUTPUTS; i++)
+			possibleNodes.add(Neat.NUMBER_OF_INPUTS + Neat.MAX_HIDDEN_NODES + i);
+		
+		int randomIndex = (int) Math.round(Math.random() * possibleNodes.size());
+		
+		Iterator<Integer> values = possibleNodes.iterator();
+		
+		for (int i = 0; i < randomIndex - 1; i++)
+			values.next();
+		
+		return values.next();
 	}
 	
 	protected void genNetwork() {
@@ -153,6 +175,14 @@ public class Genome {
 		for (Gene gene : genes) {
 			if (gene.in == newGene.in && gene.out == newGene.out) return;
 		}
+
+		if (newGene.in == newGene.out) newGene.isRecurrent = true;
+		//else if (Math.random() > 0.5) newGene.isRecurrent = true; // TODO Look at to see if recurrent can go to different node
+		
+		if (!Neat.ALLOW_RECURRENT_CONNECTIONS && newGene.isRecurrent) {
+			linkMutate(isBiasMutate);
+			return;
+		}
 		
 		newGene.innovationNumber = Neat.getNextInnovationNum();
 		newGene.weight = Math.random() * 4 - 2;
@@ -194,6 +224,11 @@ public class Genome {
 			int randomIndex = randomValue(possibleGenes);
 			possibleGenes.get(randomIndex).isEnabled = !possibleGenes.get(randomIndex).isEnabled;
 		}
+	}
+
+	public Gene hasInnovation(Gene gene) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

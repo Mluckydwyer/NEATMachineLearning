@@ -24,6 +24,8 @@ public class Neat {
 	public static final double DELTA_WEIGHTS = 0.4;
 	
 	public static final double BIAS_NODE_VALUE = 1.0;
+	
+	public static final boolean ALLOW_RECURRENT_CONNECTIONS = false;
 
 	public static NeatObjective neatObjective;
 	public static SimultaneousNeatObjective simultaneousNeatObjective;
@@ -32,6 +34,8 @@ public class Neat {
 	private static boolean learning;
 	private static int innovationNumber;
 
+	public static int generationNumber;
+	
 	public static boolean SIMULTANEOUS_FITNESS_TESTS;
 	public static int POPULATION_SIZE;
 	public static int NUMBER_OF_INPUTS;
@@ -58,6 +62,7 @@ public class Neat {
 	public Neat(String title, NeatParameters params) {
 		learning = false;
 		innovationNumber = 1;
+		generationNumber = 1;
 		generations = new ArrayList<Generation>();
 
 		TITLE = title;
@@ -68,8 +73,8 @@ public class Neat {
 	}
 
 	public void setParameters(NeatParameters params) {
-		NUMBER_OF_INPUTS = params.getInputs();
-		NUMBER_OF_OUTPUTS = params.getOutputs();
+		NUMBER_OF_INPUTS = params.getNumberOfInputs();
+		NUMBER_OF_OUTPUTS = params.getNumberOfOutputs();
 		POPULATION_SIZE = params.getPopulationSize();
 		TARGET_FITNESS = params.getTargetFitness();
 
@@ -107,6 +112,7 @@ public class Neat {
 		generations.add(firstGeneration);
 
 		do {
+			generationNumber++;
 			generations.add(generations.get(generations.size() - 1).genNextGen());
 		} while (generations.get(generations.size() - 1).getMaxFitness() < TARGET_FITNESS);
 	}
