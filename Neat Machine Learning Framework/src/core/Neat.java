@@ -40,23 +40,24 @@ public class Neat {
 	public static int POPULATION_SIZE;
 	public static int NUMBER_OF_INPUTS;
 	public static int NUMBER_OF_OUTPUTS;
+	public static int MAX_GENERATIONS;
 	public static double TARGET_FITNESS;
 	public static String TITLE;
 
 	public Neat() {
-		this("Unspecified Objective");
+		this("Untitled Experiment");
 	}
 
 	public Neat(String title) {
 		this(title, new NeatParameters());
 	}
 
-	public Neat(String title, NeatObjective obj, int numInputs, int numOutputs, int populationSize, double targetFitness) {
-		this(title, new NeatParameters(obj, numInputs, numOutputs, populationSize, targetFitness));
+	public Neat(String title, NeatObjective obj, int numInputs, int numOutputs, int populationSize, int maxGenerations, double targetFitness) {
+		this(title, new NeatParameters(obj, numInputs, numOutputs, populationSize, maxGenerations, targetFitness));
 	}
 
-	public Neat(String title, SimultaneousNeatObjective obj, int numInputs, int numOutputs, int populationSize, double targetFitness) {
-		this(title, new NeatParameters(obj, numInputs, numOutputs, populationSize, targetFitness));
+	public Neat(String title, SimultaneousNeatObjective obj, int numInputs, int numOutputs, int populationSize, int maxGenerations, double targetFitness) {
+		this(title, new NeatParameters(obj, numInputs, numOutputs, populationSize, maxGenerations, targetFitness));
 	}
 
 	public Neat(String title, NeatParameters params) {
@@ -76,6 +77,7 @@ public class Neat {
 		NUMBER_OF_INPUTS = params.getNumberOfInputs();
 		NUMBER_OF_OUTPUTS = params.getNumberOfOutputs();
 		POPULATION_SIZE = params.getPopulationSize();
+		MAX_GENERATIONS = params.getMaxGenerations();
 		TARGET_FITNESS = params.getTargetFitness();
 
 		if (params.getNeatObjective() != null) {
@@ -89,10 +91,11 @@ public class Neat {
 	}
 
 	private void verifyParams() {
-		if (simultaneousNeatObjective == null && neatObjective == null) throw new InvalidParameterException("Neat: The Objective cannot be null");
-		if (NUMBER_OF_INPUTS <= 0) throw new InvalidParameterException("Neat: The Number of inputs must be > 0, was: " + NUMBER_OF_INPUTS);
-		if (NUMBER_OF_OUTPUTS <= 0) throw new InvalidParameterException("Neat: The Number of outputs must be > 0, was: " + NUMBER_OF_OUTPUTS);
+		if (simultaneousNeatObjective == null && neatObjective == null) throw new InvalidParameterException("Neat: An Objective must be specified, was: null");
+		if (NUMBER_OF_INPUTS <= 0) throw new InvalidParameterException("Neat: The number of Inputs must be > 0, was: " + NUMBER_OF_INPUTS);
+		if (NUMBER_OF_OUTPUTS <= 0) throw new InvalidParameterException("Neat: The number of Outputs must be > 0, was: " + NUMBER_OF_OUTPUTS);
 		if (POPULATION_SIZE <= 0) throw new InvalidParameterException("Neat: The Population size must be > 0, was: " + POPULATION_SIZE);
+		if (MAX_GENERATIONS <= 0) throw new InvalidParameterException("Neat: The Maximum number of Generations must be > 0, was: " + MAX_GENERATIONS);
 		if (TARGET_FITNESS <= 0) throw new InvalidParameterException("Neat: The Target Fitness must be > 0, was: " + TARGET_FITNESS);
 	}
 
@@ -114,7 +117,7 @@ public class Neat {
 		do {
 			generationNumber++;
 			generations.add(generations.get(generations.size() - 1).genNextGen());
-		} while (generations.get(generations.size() - 1).getMaxFitness() < TARGET_FITNESS);
+		} while (generations.get(generations.size() - 1).getMaxFitness() < TARGET_FITNESS && generationNumber < MAX_GENERATIONS);
 	}
 
 	public String toSTring() {
@@ -124,7 +127,7 @@ public class Neat {
 		out += "Objective:\t" + TITLE;
 		out += "\nInputs:\t" + NUMBER_OF_INPUTS;
 		out += "\nOutputs:\t" + NUMBER_OF_OUTPUTS;
-		out += "\nPopulation:\t" + POPULATION_SIZE;
+		out += "\nPopulation:\t" + POPULATION_SIZE + ((POPULATION_SIZE == NeatParameters.DEFAULT_POPULATION_SIZE)? " [Default]" : "");
 		out += "\nTarget Fitness:\t" + TARGET_FITNESS;
 		out += "\n";
 
