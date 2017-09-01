@@ -126,12 +126,51 @@ public class Generation {
 
 	// subtract one to leave space for top of species from last generation
 	private ArrayList<Genome> breedChildren(ArrayList<Genome> children) {
-		// TODO Auto-generated method stub
-		return null;
+		//assuming  fitness is positive and that a higher fitness means it's better 
+		double maxFitness = 0;
+		Genome best = new Genome();
+		for(Species s : species){
+			for(Genome g : s.genomes){
+				if(g.fitness > maxFitness){
+					maxFitness = g.fitness;
+					best = g;
+				}
+			}
+		}
+		//adds the best genome into children
+		children.add(best);
+		
+		//gather all genomes
+		ArrayList<Genome> allGenomes = new ArrayList<Genome>();
+		for(Species s : species){
+			for(Genome g : s.genomes){
+				allGenomes.add(g);
+			}
+		}
+		
+		for(int i = 1; i < Neat.POPULATION_SIZE; i++){
+			Genome mom;
+			Genome dad;
+			Genome g1 = allGenomes.get((int) (Math.random() * allGenomes.size()));
+			Genome g2 = allGenomes.get((int) (Math.random() * allGenomes.size()));
+			if(g1.fitness > g2.fitness)
+				mom = g1;
+			else
+				mom = g2;
+			g1 = allGenomes.get((int) (Math.random() * allGenomes.size()));
+			g2 = allGenomes.get((int) (Math.random() * allGenomes.size()));
+			if(g1.fitness > g2.fitness)
+				dad = g1;
+			else
+				dad = g2;
+			children.add(crossover(mom, dad));
+		}
+		return children;
 	}
 
+	//unused code
 	private Genome breadChild(Species species) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 	
