@@ -1,46 +1,66 @@
 package core;
 
 import java.security.InvalidParameterException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import core.hierarchy.Generation;
+import core.hierarchy.Genome;
 
 public class Neat {
 
 	public static final int MAX_HIDDEN_NODES = 1000000; // 1,000,000
-	public static final int STALE_SPECIES = 15;
+	public static final int STALE_SPECIES = 20;
 
-	public static final double PERTURB_CONNECTION_WEIGHT_CHANCE = 0.90;
-	public static final double CONNECTION_MUTATION_CHANCE = 0.25;
-	public static final double LINK_MUTATION_CHANCE = 2.00;
-	public static final double BIAS_MUTATION_CHANCE = 0.40;
-	public static final double NODE_MUTATION_CHANCE = 0.50;
-	public static final double ENABLE_MUTATION_CHANCE = 0.20;
-	public static final double DISABLE_MUTATION_CHANCE = 0.40;
-	public static final double STEP_SIZE = 0.10;
+	public static final double CROSSOVER_CHANCE = 0.75;
+	public static final double PERTURB_WEIGHT_CHANCE = 0.50; // TODO Tune
+	public static final double WEIGHT_MUTATION_CHANCE = 0.80; // 
+	public static final double CONNECTION_MUTATION_CHANCE = 0.30; // 0.05
+	public static final double BIAS_MUTATION_CHANCE = 0.40; // TODO Tune 0.15
+	public static final double NODE_MUTATION_CHANCE = 0.03;
+	public static final double ENABLE_MUTATION_CHANCE = 0.01; // TODO Tune 0.2
+	public static final double DISABLE_MUTATION_CHANCE = 0.05; // TODO Tune 0.1
+	public static final double STEP_SIZE = 0.50; // 0.1
 
-	public static final double DELTA_THRESHOLD = 1.0;
-	public static final double DELTA_DISJOINT = 2.0;
-	public static final double DELTA_WEIGHTS = 0.4;
+	public static final double DELTA_THRESHOLD = 4.0; // 1
+	public static final double DELTA_DISJOINT = 1.0; // 2
+	public static final double DELTA_EXCESS = 1.0; // 2
+	public static final double DELTA_WEIGHTS = 3.0; // 0.4
 	
 	public static final double BIAS_NODE_VALUE = 1.0;
 	
-	public static final boolean ALLOW_RECURRENT_CONNECTIONS = false;
+	public static final boolean ALLOW_RECURRENT_CONNECTIONS = false; // TODO
+	public static final boolean VERBOSE_CONSOLE = false;
 
+	//BETA PARAMS
+	public static final int SPECIES_ELITE_MEMBERS = 2;
+	public static final double SURVIVAL_THRESHOLD = 0.2;
+
+	
 	public static NeatObjective neatObjective;
 	public static SimultaneousNeatObjective simultaneousNeatObjective;
-	public ArrayList<Generation> generations;
+	public static DecimalFormat numberFormatter;
+	public static NeatParameters parameters;
+
+	public static ArrayList<Generation> generations;
 
 	private static boolean learning;
 	private static int innovationNumber;
+	public static Date startTimestamp;
+	private static Genome topGenome;
 
 	public static int generationNumber;
+	private static int staleGenerationCount; // TODO include this every 20 to focus on only top two species
 	
 	public static boolean SIMULTANEOUS_FITNESS_TESTS;
 	public static int POPULATION_SIZE;
 	public static int NUMBER_OF_INPUTS;
 	public static int NUMBER_OF_OUTPUTS;
 	public static int MAX_GENERATIONS;
+	public static long RANDOM_SEED;
 	public static double TARGET_FITNESS;
 	public static String TITLE;
 
@@ -48,23 +68,16 @@ public class Neat {
 		this("Untitled Experiment");
 	}
 
-	public Neat(String title) {
-		this(title, new NeatParameters());
-	}
-
-	public Neat(String title, NeatObjective obj, int numInputs, int numOutputs, int populationSize, int maxGenerations, double targetFitness) {
-		this(title, new NeatParameters(obj, numInputs, numOutputs, populationSize, maxGenerations, targetFitness));
-	}
-
-	public Neat(String title, SimultaneousNeatObjective obj, int numInputs, int numOutputs, int populationSize, int maxGenerations, double targetFitness) {
-		this(title, new NeatParameters(obj, numInputs, numOutputs, populationSize, maxGenerations, targetFitness));
+	public Neat(String title) {		this(title, new NeatParameters());
 	}
 
 	public Neat(String title, NeatParameters params) {
 		learning = false;
 		innovationNumber = 1;
-		generationNumber = 1;
+		generationNumber = 0;
+		
 		generations = new ArrayList<Generation>();
+		numberFormatter = new DecimalFormat("##############0.0######");
 
 		TITLE = title;
 		SIMULTANEOUS_FITNESS_TESTS = false;
@@ -73,21 +86,36 @@ public class Neat {
 		System.out.println(this);
 	}
 
-	public void setParameters(NeatParameters params) {
+	public void updateParameters() {
+		if (!learning)
+			setParameters(Neat.parameters);
+		else
+			throw new RuntimeException("Cannot update Parameters while learning is in progress");
+	}
+	
+	private void setParameters(NeatParameters params) {
+		Neat.parameters = params;
+
 		NUMBER_OF_INPUTS = params.getNumberOfInputs();
 		NUMBER_OF_OUTPUTS = params.getNumberOfOutputs();
-		POPULATION_SIZE = params.getPopulationSize();
+		POPULATION_SIZE = params.getLoosePopulationSize();
 		MAX_GENERATIONS = params.getMaxGenerations();
 		TARGET_FITNESS = params.getTargetFitness();
 
-		if (params.getNeatObjective() != null) {
+		if (params.getSimultaneousNeatObjective() != null) {
+			simultaneousNeatObjective = params.getSimultaneousNeatObjective();
+			setSimultaneousFitnessTests(true);
+		}
+		else if (params.getNeatObjective() != null) {
 			neatObjective = params.getNeatObjective();
 			setSimultaneousFitnessTests(false);
 		}
-		else if (params.getSimultaneousObjective() != null) {
-			simultaneousNeatObjective = params.getSimultaneousObjective();
-			setSimultaneousFitnessTests(true);
-		}
+		
+		if (params.getSeed() == Long.MIN_VALUE)
+			RANDOM_SEED = System.nanoTime();
+		else
+			RANDOM_SEED = params.getSeed();
+		
 	}
 
 	private void verifyParams() {
@@ -100,7 +128,7 @@ public class Neat {
 	}
 
 	private void setSimultaneousFitnessTests(boolean simultaneous) {
-		if (!learning) SIMULTANEOUS_FITNESS_TESTS = true;
+		if (!learning) SIMULTANEOUS_FITNESS_TESTS = simultaneous;
 	}
 
 	public static int getNextInnovationNum() {
@@ -110,7 +138,8 @@ public class Neat {
 	public void learn() {
 		verifyParams();
 		learning = true;
-		System.out.println("Learning initiated");
+		startTimestamp = new Date(System.currentTimeMillis());
+		System.out.println("\n> Timestamp:\t" + getTimestamp(startTimestamp.getTime()) + "\n> Learning initiated");
 		Generation firstGeneration = new Generation().firstGen();
 		generations.add(firstGeneration);
 
@@ -118,20 +147,39 @@ public class Neat {
 			generationNumber++;
 			generations.add(generations.get(generations.size() - 1).genNextGen());
 		} while (generations.get(generations.size() - 1).getMaxFitness() < TARGET_FITNESS && generationNumber < MAX_GENERATIONS);
+		
+		topGenome = generations.get(generations.size() - 1).rankGlobally(generations.get(generations.size() - 1).species);
+	}
+	
+	public static String getTimestamp(long time) {
+		return new SimpleDateFormat("HH:mm:ss.SSS").format(time);
+	}
+	
+	public static String getComputeTime(Date date) {
+		long millis = System.currentTimeMillis() - date.getTime();
+		return String.format("%02d:%02d:%02d.%03d", TimeUnit.MILLISECONDS.toHours(millis), TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)), TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)), millis - TimeUnit.SECONDS.toMillis(TimeUnit.MILLISECONDS.toSeconds(millis)));
 	}
 
-	public String toSTring() {
+	public String toString() {
 		String out = "";
 		out += "NeuroEvolution of Augmenting Topologies\n";
 		out += "----------------------------------------\n";
 		out += "Objective:\t" + TITLE;
-		out += "\nInputs:\t" + NUMBER_OF_INPUTS;
+		out += "\nSeed:\t\t" + RANDOM_SEED;
+		out += "\nInputs:\t\t" + NUMBER_OF_INPUTS;
 		out += "\nOutputs:\t" + NUMBER_OF_OUTPUTS;
 		out += "\nPopulation:\t" + POPULATION_SIZE + ((POPULATION_SIZE == NeatParameters.DEFAULT_POPULATION_SIZE)? " [Default]" : "");
 		out += "\nTarget Fitness:\t" + TARGET_FITNESS;
 		out += "\n";
 
 		return out;
+	}
+
+	/**
+	 * @return the topGenome
+	 */
+	public static Genome getTopGenome() {
+		return topGenome;
 	}
 
 }

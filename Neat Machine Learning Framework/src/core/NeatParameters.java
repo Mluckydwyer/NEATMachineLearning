@@ -4,8 +4,9 @@ public class NeatParameters {
 
 	private int inputs;
 	private int outputs;
-	private int populationSize;
+	private int loosePopulationSize;
 	private int maxGenerations;
+	private long randomGenerationSeed = Long.MIN_VALUE;
 	private double targetFitness;
 	private NeatObjective nObjective;
 	private SimultaneousNeatObjective sObjective;
@@ -15,54 +16,13 @@ public class NeatParameters {
 	public static final double MAX_FITNESS = Double.MAX_VALUE;
 
 	public NeatParameters() {
-		this((NeatObjective) null, 0, 0, DEFAULT_POPULATION_SIZE, 0, 0.0);
-	}
-
-	// Simultaneous Neat
-	public NeatParameters(SimultaneousNeatObjective objective, int inputs, int outputs, double targetFitness) {
-		this(inputs, outputs, DEFAULT_POPULATION_SIZE, MAX_GENERATIONS, targetFitness);
-		this.sObjective = objective;
-		this.nObjective = null;
-	}
-
-	public NeatParameters(SimultaneousNeatObjective objective, int inputs, int outputs, int maxGenerations) {
-		this(inputs, outputs, DEFAULT_POPULATION_SIZE, maxGenerations, MAX_FITNESS);
-		this.sObjective = objective;
-		this.nObjective = null;
-	}
-	
-	public NeatParameters(SimultaneousNeatObjective objective, int inputs, int outputs, int populationSize, int maxGenerations, double targetFitness) {
-		this(inputs, outputs, populationSize, maxGenerations, targetFitness);
-		this.sObjective = objective;
-		this.nObjective = null;
-	}
-	
-	// Neat
-	public NeatParameters(NeatObjective objective, int inputs, int outputs, double targetFitness) {
-		this(inputs, outputs, DEFAULT_POPULATION_SIZE, MAX_GENERATIONS, targetFitness);
-		this.nObjective = objective;
-		this.sObjective = null;
-	}
-	
-	public NeatParameters(NeatObjective objective, int inputs, int outputs, int maxGenerations) {
-		this(inputs, outputs, DEFAULT_POPULATION_SIZE, maxGenerations, MAX_FITNESS);
-		this.nObjective = objective;
-		this.sObjective = null;
-	}
-	
-	public NeatParameters(NeatObjective objective, int inputs, int outputs, int populationSize, int maxGenerations, double targetFitness) {
-		this(inputs, outputs, populationSize, maxGenerations, targetFitness);
-		this.nObjective = objective;
-		this.sObjective = null;
+		this(0, 0);
 	}
 
 	// Final Constructor
-	public NeatParameters(int inputs, int outputs, int populationSize, int maxGenerations, double targetFitness) {
+	public NeatParameters(int inputs, int outputs) {
 		this.inputs = inputs;
 		this.outputs = outputs;
-		this.populationSize = populationSize;
-		this.maxGenerations = maxGenerations;
-		this.targetFitness = targetFitness;
 	}
 
 	/**
@@ -96,15 +56,15 @@ public class NeatParameters {
 	/**
 	 * @return the population
 	 */
-	public int getPopulationSize() {
-		return populationSize;
+	public int getLoosePopulationSize() {
+		return loosePopulationSize;
 	}
 
 	/**
 	 * @param population the population to set
 	 */
-	public void setPopulationSize(int populationSize) {
-		this.populationSize = populationSize;
+	public void setLoosePopulationSize(int populationSize) {
+		this.loosePopulationSize = populationSize;
 	}
 
 	/**
@@ -138,14 +98,14 @@ public class NeatParameters {
 	/**
 	 * @return the sObjective
 	 */
-	public SimultaneousNeatObjective getSimultaneousObjective() {
+	public SimultaneousNeatObjective getSimultaneousNeatObjective() {
 		return sObjective;
 	}
 
 	/**
 	 * @param sObjective the sObjective to set
 	 */
-	public void setSimultaneousObjective(SimultaneousNeatObjective sObjective) {
+	public void setSimultaneousNeatObjective(SimultaneousNeatObjective sObjective) {
 		this.sObjective = sObjective;
 	}
 
@@ -161,6 +121,20 @@ public class NeatParameters {
 	 */
 	public void setMaxGenerations(int maxGenerations) {
 		this.maxGenerations = maxGenerations;
+	}
+
+	/**
+	 * @return the randomGenerationSeed
+	 */
+	public long getSeed() {
+		return randomGenerationSeed;
+	}
+
+	/**
+	 * @param randomGenerationSeed the randomGenerationSeed to set
+	 */
+	public void setSeed(long randomGenerationSeed) {
+		this.randomGenerationSeed = randomGenerationSeed;
 	}
 
 }

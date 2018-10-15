@@ -17,13 +17,14 @@ public class NeuralNet {
 			neurons[i] = (new Neuron());
 		
 		for (int i = 1; i <= Neat.NUMBER_OF_OUTPUTS; i++)
-			neurons[Neat.NUMBER_OF_INPUTS + Neat.MAX_HIDDEN_NODES + i] = new Neuron();
+			neurons[Neat.NUMBER_OF_INPUTS + Neat.MAX_HIDDEN_NODES + i - 1] = new Neuron();
 		
 		genes.sort(new Comparator<Gene>() {
 			@Override
 			public int compare(Gene g1, Gene g2) {
 				if (g1.out < g2.out) return -1;
-				return 1;
+				if (g1.out > g2.out) return 1;
+				return 0;
 			}
 		});
 		
@@ -51,22 +52,39 @@ public class NeuralNet {
 		for (int i = 1; i <= inputs.length; i++)
 			neurons[i].value = inputs[i - 1];
 		
-		for (Neuron neuron : neurons) {
-			neuron.value = sigmoid(neuron.sumIncoming(neurons));
-			if (neuron.incoming.isEmpty()) neuron.value = 0;
+		for (int i = Neat.NUMBER_OF_INPUTS; i < Neat.NUMBER_OF_INPUTS + Neat.MAX_HIDDEN_NODES + Neat.NUMBER_OF_OUTPUTS; i++) {
+			Neuron neuron = neurons[i];
+			if (neuron != null && neuron.incoming.size() > 0) {
+				if (i < Neat.NUMBER_OF_INPUTS)
+					neuron.value = linear(neuron.sumIncoming(neurons));
+				else
+					neuron.value = sigmoid(neuron.sumIncoming(neurons));
+				
+				//if (neuron.incoming.isEmpty()) neuron.value = 0;
+			}
 		}
 		
+		
+		//for (int i = 1; i <= Neat.NUMBER_OF_OUTPUTS; i++)
+			//neurons[Neat.NUMBER_OF_INPUTS + Neat.MAX_HIDDEN_NODES + i - 1].calcValue(neurons);
+		
 		for (int i = 1; i <= outputs.length; i++)
-			outputs[i - 1] = neurons[Neat.NUMBER_OF_INPUTS + Neat.MAX_HIDDEN_NODES + i].value;
+			outputs[i - 1] = neurons[Neat.NUMBER_OF_INPUTS + Neat.MAX_HIDDEN_NODES + i - 1].value;
 		
 		for (Neuron neuron : neurons)
-			neuron.history.add(neuron.value);
+			if (neuron != null)
+				neuron.history.add(neuron.value);
 		
 		return outputs;
 	}
 
 	private double sigmoid(double sum) {
-		return 2 / (1 + Math.exp(-4.9 * sum)) - 1;
+		//return 2 / (1 + Math.exp(-4.9 * sum)) - 1;
+		return 1D / (1D + Math.pow(Math.E, -sum));
+	}
+	
+	private double linear(double sum) {
+		return sum;
 	}
 	
 }

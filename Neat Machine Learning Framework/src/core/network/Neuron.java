@@ -31,5 +31,13 @@ public class Neuron {
 		
 		return sum;
 	}
+
+	public double calcValue(Neuron[] neurons) {
+		for (Gene gene : incoming) {
+			neurons[gene.in].calcValue(neurons);
+		}
+		
+		return sumIncoming(neurons);
+	}
 	
 }

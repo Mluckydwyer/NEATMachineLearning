@@ -18,6 +18,18 @@ public class Species {
 		previousTopFitness = 0;
 	}
 
+	public Species(int staleness, double previousTopFitness, double averageFitness, ArrayList<Genome> genomes) {
+		this();
+		this.staleness = staleness;
+		this.previousTopFitness = previousTopFitness;
+		this.averageFitness = averageFitness;
+		
+		for (int i = 0; i < genomes.size(); i++)
+			this.genomes.add(((ArrayList<Genome>) genomes.clone()).get(i));
+		
+		sort();
+	}
+	
 	public void sort() {
 		Collections.sort(genomes, new Comparator<Genome>() {
 			@Override
@@ -33,7 +45,9 @@ public class Species {
 	}
 	
 	public double averageFitness() {
-		int sum = 0;
+		double sum = 0;
+		
+		//if (genomes.isEmpty()) return 0;
 		
 		for (Genome g:genomes)
 			sum += g.fitness;

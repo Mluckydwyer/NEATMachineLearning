@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import core.Neat;
 import core.NeatObjective;
+import core.NeatParameters;
 import core.hierarchy.Genome;
 import core.hierarchy.Species;
 
@@ -28,9 +29,11 @@ public class NeatSnake implements NeatObjective, KeyListener {
 	private ArrayList<Snake> snakes;
 	public static final int numSquares = 15;
 	private final int squareSize = 50;
+	private long seed = 12345;
 	private boolean AI = false; // Toggles Neat Genetic Learning Framework
 	private double targetFitness = 10000; // 10,000?
 	private int populationSize = 100;
+	private int maxGenerations = 100;
 	private boolean running;
 	private Point center;
 	private JFrame mainFrame;
@@ -52,11 +55,14 @@ public class NeatSnake implements NeatObjective, KeyListener {
 
 		};
 
-		if (AI)
-			neat = new Neat("NEAT Snake", this, numSquares * numSquares, Direction.values().length, populationSize, targetFitness);
+		if (AI) {
+			neat = new Neat("NEAT Snake", this, numSquares * numSquares, Direction.values().length, populationSize, maxGenerations, targetFitness);
+			neat.parameters.setSeed(seed);
+			neat.updateParameters();
+		}
 		else snakes.add(new Snake());
 
-		random = new Random(12345); // test seed
+		random = new Random(seed); // test seed
 		running = true;
 		center = new Point((int) Math.ceil(numSquares / 2), (int) Math.ceil(numSquares / 2));
 
