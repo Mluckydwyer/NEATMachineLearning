@@ -12,7 +12,7 @@ import core.hierarchy.Genome;
 
 public class Neat {
 
-	public static final int MAX_HIDDEN_NODES = 1000000; // 1,000,000
+	public static final int MAX_HIDDEN_NODES = 1000000; // 1,000,000 TODO Not sure in needed this high
 	public static final int STALE_SPECIES = 20;
 
 	public static final double CROSSOVER_CHANCE = 0.75;
